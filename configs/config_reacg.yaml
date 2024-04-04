@@ -1,0 +1,30 @@
+dataset: cifar10
+model_name: Ding2020MMA
+batch_size: 2000
+n_examples: 10000
+
+threat_model: Linf
+
+attacker_name: ReACG
+n_targets: 9
+param:
+  epsilon: 0.03137254901960784
+  max_iter: 100
+  criterion_name: cw
+  initial_stepsize: 0.062745098039216
+  beta: HS
+  use_clamp: false
+  normalization: sign
+  rho: 0.75
+  move_to_best: true
+  initial_point: input
+  odi_iter: 2
+  odi_step: 0.03137254901960784
+  n_restarts: 1
+  use_cw_value: false
+  scaling_method: norm # or norm or zero
+  scaling_constant: 100000
+  use_linstep: false
+  a: 0.43 # p_1
+  b: 0.24 # q
+  c: 0.08 # q_{min}

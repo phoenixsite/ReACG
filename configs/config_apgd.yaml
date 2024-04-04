@@ -1,0 +1,24 @@
+# The same settings in ACG paper
+dataset: cifar10
+model_name: Ding2020MMA
+batch_size: 2000
+n_examples: 10000
+
+threat_model: Linf
+
+attacker_name: APGD
+n_targets: 9
+param:
+  epsilon: 0.03137254901960784
+  max_iter: 100
+  criterion_name: cw
+  initial_stepsize: 0.062745098039216
+  normalization: sign
+  rho: 0.75
+  move_to_best: true
+  initial_point: center
+  odi_iter: 2
+  odi_step: 0.03137254901960784
+  momentum_alpha: 0.75
+  n_restarts: 1
+  use_cw_value: false
