@@ -1,6 +1,6 @@
 from .args import argparser
 from .configuration import (correct_param, get_machine_info, reproducibility,
-                            set_configurations)
+                            get_configurations)
 from .io import InformationWriter, overwrite_config, read_yaml, tensor2csv
 from .loader import load_imagenet, load_model_and_dataset
 from .logging import setup_logger

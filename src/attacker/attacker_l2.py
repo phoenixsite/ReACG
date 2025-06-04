@@ -10,8 +10,6 @@ logger = setup_logger(__name__)
 
 
 class ACGL2(ACG):
-    def __init__(self, *args, **kwargs):
-        super(ACGL2, self).__init__(*args, **kwargs)
 
     def set_projection(self, x_nat: torch.Tensor):
         self.x_nat = x_nat.clone()
@@ -28,8 +26,6 @@ class ACGL2(ACG):
 
 
 class ReACGL2(ReACG):
-    def __init__(self, *args, **kwargs):
-        super(ReACGL2, self).__init__(*args, **kwargs)
 
     def set_projection(self, x_nat: torch.Tensor):
         self.x_nat = x_nat.clone()
@@ -46,8 +42,6 @@ class ReACGL2(ReACG):
 
 
 class APGDL2(APGD):
-    def __init__(self, *args, **kwargs):
-        super(APGDL2, self).__init__(*args, **kwargs)
 
     def set_projection(self, x_nat: torch.Tensor):
         self.x_nat = x_nat.clone()

@@ -15,8 +15,22 @@ logger = setup_logger(__name__)
 class ACG(BaseAttacker):
     """Auto Conjugate Gradient (ACG) Attack"""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super(ACG, self).__init__(*args, **kwargs)
+    @classmethod
+    def _set_name(cls, params):
+        beta = params["beta"]
+        max_iter = params["max_iter"]
+        criterion_name = params["criterion_name"]
+        use_cw_value = params["use_cw_value"]
+        use_cw_flag = "UseCW" if use_cw_value else ""
+        return "-".join(
+            [
+                "ACG",
+                beta,
+                criterion_name,
+                str(max_iter),
+                use_cw_flag,
+            ]
+        )
 
     def attack(
         self,
@@ -30,6 +44,9 @@ class ACG(BaseAttacker):
         *args,
         **kwargs,
     ):
+        """
+        """
+
         self.set_projection(x_nat)
         bs = x_nat.shape[0]
         max_iter = parameters["max_iter"]
@@ -321,20 +338,4 @@ class ACG(BaseAttacker):
             n_forward,
             n_backward,
             acc,
-        )
-
-    def set_name(self, parameters: Dict):
-        beta = parameters["beta"]
-        max_iter = parameters["max_iter"]
-        criterion_name = parameters["criterion_name"]
-        use_cw_value = parameters["use_cw_value"]
-        use_cw_flag = "UseCW" if use_cw_value else ""
-        self.name = "-".join(
-            [
-                "ACG",
-                beta,
-                criterion_name,
-                str(max_iter),
-                use_cw_flag,
-            ]
         )

@@ -22,7 +22,7 @@ def argparser():
     )
     parser.add_argument("-g", "--gpu", type=int, default=None)
     parser.add_argument("-bs", "--batch_size", type=int, default=None)
-    parser.add_argument("--n_threads", type=int, default=1)
+    parser.add_argument("--n_threads", type=int, default=4)
     parser.add_argument(
         "--image_indices",
         type=str,
@@ -42,5 +42,12 @@ def argparser():
         "--experiment",
         action="store_true",
         help="attack all images when this flag is on",
+    )
+    parser.add_argument(
+        "-sa",
+        "--save-adversarial",
+        action="store_true",
+        default=False,
+        help="whether to save the adversarial images in a folder",
     )
     return parser

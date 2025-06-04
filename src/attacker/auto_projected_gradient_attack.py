@@ -15,8 +15,23 @@ logger = setup_logger(__name__)
 class APGD(BaseAttacker):
     """Auto Projected Gradient Descent (APGD) Attack"""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super(APGD, self).__init__(*args, **kwargs)
+    @classmethod
+    def _set_name(cls, params):
+        
+        beta = "*"
+        max_iter = params["max_iter"]
+        criterion_name = params["criterion_name"]
+        use_cw_value = params["use_cw_value"]
+        use_cw_flag = "UseCW" if use_cw_value else ""
+        return "-".join(
+            [
+                "APGD",
+                beta,
+                criterion_name,
+                str(max_iter),
+                use_cw_flag,
+            ]
+        )
 
     def attack(
         self,
@@ -30,6 +45,7 @@ class APGD(BaseAttacker):
         *args,
         **kwargs,
     ):
+        logger.info(f"Shape: {x_nat.shape}")
         self.set_projection(x_nat)
         bs = x_nat.shape[0]
         max_iter = parameters["max_iter"]
@@ -277,22 +293,7 @@ class APGD(BaseAttacker):
             n_backward,
             acc,
         )
-
-    def set_name(self, parameters: Dict):
-        beta = "*"
-        max_iter = parameters["max_iter"]
-        criterion_name = parameters["criterion_name"]
-        use_cw_value = parameters["use_cw_value"]
-        use_cw_flag = "UseCW" if use_cw_value else ""
-        self.name = "-".join(
-            [
-                "APGD",
-                beta,
-                criterion_name,
-                str(max_iter),
-                use_cw_flag,
-            ]
-        )
+        
 
 
 # import numpy as np

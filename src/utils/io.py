@@ -11,7 +11,9 @@ logger = setup_logger(__name__)
 
 
 def read_yaml(paths):
-    """reader of yaml file
+    """
+    Read some YAML files and return their parameters.
+
     Parameters
     ----------
     paths: str or list of str
@@ -27,9 +29,9 @@ def read_yaml(paths):
     obj = BaseDict()
     for path in paths:
         logger.debug(f"\n [ READ ] {path}")
-        f = open(path, mode="r")
-        _obj = yaml.safe_load(f)
-        f.close()
+        
+        with open(path, mode="r") as f:
+            _obj = yaml.safe_load(f)
 
         for key, value in _obj.items():
             if not isinstance(value, dict):

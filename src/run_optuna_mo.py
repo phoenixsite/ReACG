@@ -12,7 +12,7 @@ from core.initial_point import (OutputDiversifiedSampling,
                                 get_naive_initialpoint)
 from evaluator_base import EvaluatorBase
 from utils import (argparser, load_model_and_dataset, overwrite_config,
-                   read_yaml, reproducibility, set_configurations,
+                   read_yaml, reproducibility, get_configurations,
                    setup_logger)
 from utils.helper_functions import compute_accuracy
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     # overwrite by cmd_param
     if args.cmd_param is not None:
         config = overwrite_config(args.cmd_param, config)
-    set_configurations(config, args)
+    get_configurations(config, args)
     # config["param"]["initialpoint"]["dataset"] = config.dataset
     torch.set_num_threads(args.n_threads)
     os.environ["OMP_NUM_THREADS"] = str(args.n_threads)

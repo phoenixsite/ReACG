@@ -22,6 +22,18 @@ def compute_accuracy(
     device: torch.device,
     K: int = 9,
 ) -> Tuple[torch.Tensor]:
+    """
+    Calculate the accuracy of the model according to the samples
+    `x` and the labels `y`.
+
+    :param x: Samples.
+    :param y: Labels of each ``x``.
+    :param batch_size: 
+    :param model: Model used to classify the data in ``x``.
+    :param device: Hardware where the operations are done.
+    :param K: 
+    """
+
     n_examples = len(x)
     acc = torch.ones((n_examples,), dtype=bool)
     cw_loss = torch.ones((n_examples,))
@@ -50,7 +62,7 @@ def compute_accuracy(
                 y_target[target_image_indices, _k - 2] == y[target_image_indices]
             ).to(torch.bool)
             y_target[target_image_indices, _k - 2][_inds] = inds[_inds][:, -_k]
-    logger.info(f"accuracy: {acc.sum().item() / acc.shape[0] * 100:.2f}")
+    logger.info(f"accuracy: {acc.sum().item() / acc.shape[0] * 100:.2f}%")
     return acc, cw_loss, y_target
 
 
@@ -142,7 +154,7 @@ def get_beta(
         betak = betak.clamp(min=0)
     infty_inds = torch.isinf(betak)
     if infty_inds.any():
-        logger.warning(f"#infty occurs: {infty_inds.sum().item()}")
+        logger.warning(f"#infty occurs: {infty_inds.sum().item()} times")
         if infty_inds.sum().item() == bs:
             logger.warning("infty values are rounded.")
             betak[infty_inds] = 0.0
@@ -159,7 +171,7 @@ def get_beta(
                 .float()
             )
 
-    logger.info(f"#nan in beta: {torch.isnan(betak).sum().item()}")
+    logger.info(f"Number of #nan values in beta: {torch.isnan(betak).sum().item()}")
     betak[torch.isnan(betak)] = 0.0
     if len(betak.shape) == 1:
         betak = betak.unsqueeze(1).unsqueeze(2).unsqueeze(3)

@@ -15,8 +15,29 @@ logger = setup_logger(__name__)
 class ReACG(BaseAttacker):
     """Rescaling Auto Conjugate Gradient (ReACG) Attack"""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super(ReACG, self).__init__(*args, **kwargs)
+    @classmethod
+    def _set_name(cls, params):
+        beta = params["beta"]
+        max_iter = params["max_iter"]
+        criterion_name = params["criterion_name"]
+        use_cw_value = params["use_cw_value"]
+        use_cw_flag = "UseCW" if use_cw_value else ""
+        scaling_method = params["scaling_method"]
+        use_linstep = params["use_linstep"]
+        use_linstep_flag = "Linstep" if use_linstep else ""
+        scaling_constant = str(params["scaling_constant"]) if scaling_method == "const" else ""
+        return "-".join(
+            [
+                "ReACG",
+                beta,
+                criterion_name,
+                str(max_iter),
+                use_cw_flag,
+                scaling_method,
+                scaling_constant,
+                use_linstep_flag
+            ]
+        )
 
     def attack(
         self,
@@ -381,27 +402,3 @@ class ReACG(BaseAttacker):
             n_backward,
             acc,
         )
-    def set_name(self, parameters: Dict):
-        beta = parameters["beta"]
-        max_iter = parameters["max_iter"]
-        criterion_name = parameters["criterion_name"]
-        use_cw_value = parameters["use_cw_value"]
-        use_cw_flag = "UseCW" if use_cw_value else ""
-        scaling_method = parameters["scaling_method"]
-        use_linstep = parameters["use_linstep"]
-        use_linstep_flag = "Linstep" if use_linstep else ""
-        scaling_constant = str(parameters["scaling_constant"]) if scaling_method == "const" else ""
-        self.name = "-".join(
-            [
-                "ReACG",
-                beta,
-                criterion_name,
-                str(max_iter),
-                use_cw_flag,
-                scaling_method,
-                scaling_constant,
-                use_linstep_flag
-            ]
-        )
-        
-        

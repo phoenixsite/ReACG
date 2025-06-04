@@ -18,7 +18,7 @@ class EvaluatorBase:
         Config of the evaluation
     """
 
-    def __init__(self, config, *args, **kwargs):
+    def __init__(self, config):
         self.config = config
         self.criterion: Union[Criterion, CriterionManager] = None
 
@@ -41,7 +41,7 @@ class EvaluatorBase:
         """Conduct an adversarial attack"""
         logger.info("[ Step ]")
         search_information = dict()
-        x, y = x_test.clone(), y_test.clone()
+        x, y = x_test, y_test
         n_examples = acc[self.target_indices].sum().item()
         nbatches = math.ceil(n_examples / bs)
         n_success = 0
@@ -83,9 +83,8 @@ class EvaluatorBase:
                 )
                 if len(search_information) == 0:
                     for key in search_information_batch:
-                        shape = search_information_batch[
-                            key
-                        ].shape  # [iteration, batch_size]
+                        # [iteration, batch_size]
+                        shape = search_information_batch[key].shape 
                         search_information[key] = -torch.ones((len(x_test), shape[0]))
                 for key in search_information:
                     tmp = search_information[key].clone()
@@ -119,5 +118,6 @@ class EvaluatorBase:
         target_indices,
         EXPORT_LEVEL=60,
         EXPERIMENT=False,
+        save_adversarial=False,
     ):
         raise NotImplementedError

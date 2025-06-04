@@ -1,10 +1,11 @@
 import os
-from typing import Tuple
+from typing import Tuple, Union
+from pathlib import Path
 
 import torch
 from robustbench import load_cifar10, load_model
 from robustbench.data import (CustomImageFolder, get_preprocessing,
-                              load_cifar100)
+                              load_cifar100, get_timm_model_preprocessing)
 from robustbench.model_zoo.enums import BenchmarkDataset, ThreatModel
 
 
@@ -56,27 +57,33 @@ def load_model_and_dataset(
 ) -> Tuple:
     if dataset not in {"cifar10", "cifar100", "imagenet"}:
         raise NotImplementedError(f"Dataloader for {dataset} is not implemented.")
-    prepr = get_preprocessing(
-        BenchmarkDataset(dataset), ThreatModel(threat_model), model_name, None
-    )
+
     model = load_model(
         model_name,
         model_dir=os.path.join(relative_root, "models"),
         dataset=dataset,
         threat_model=threat_model,
     )
+
+    data_dir = os.path.join(relative_root, "data")
+
     if dataset == "cifar10":
         x_test, y_test = load_cifar10(
-            n_examples=n_examples, data_dir=os.path.join(relative_root, "data")
+            n_examples=n_examples, data_dir=data_dir
         )
     elif dataset == "cifar100":
         x_test, y_test = load_cifar100(
-            n_examples=n_examples, data_dir=os.path.join(relative_root, "data")
+            n_examples=n_examples, data_dir=data_dir
         )
     elif dataset == "imagenet":
+
+        prepr = get_preprocessing(
+            BenchmarkDataset(dataset), ThreatModel(threat_model), model_name, None
+        )
+
         x_test, y_test = load_imagenet(
             n_examples=n_examples,
-            data_dir=os.path.join(relative_root, "data", "imagenet"),
+            data_dir=os.path.join(data_dir, "imagenet"),
             transforms_test=prepr,
         )
     return model, x_test, y_test

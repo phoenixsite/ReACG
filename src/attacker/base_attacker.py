@@ -11,13 +11,27 @@ logger = setup_logger(__name__)
 
 
 class BaseAttacker(metaclass=ABCMeta):
-    """White-box Attack"""
+    """
+    White-box Attack
+    
+    :param float epsilon: Supreme distance between the adversarial example
+        and the original image.
+    :param Union[str, torch.device] device: GPU or GPU to make the operations.
+    :param Projection projection: Function used to project the modifications
+        of an image to the feasible region.
+    :param str name: Name of the attack. Depends on the parameters.
+    """
 
-    def __init__(self, epsilon: float, device: Union[str, torch.device]) -> None:
-        self.epsilon: float = epsilon
+    def __init__(self, params: Dict, device: Union[str, torch.device]) -> None:
+        """
+        Set the epsilon, the device where to run the operations and 
+        the name of the attacker.
+        """
+
+        self.epsilon: float = params.epsilon
         self.device: Union[str, torch.device] = device
         self.projection: Projection = None
-        self.nam: str = None
+        self.name: str = self._set_name(params)
 
     @abstractmethod
     def attack(
@@ -33,13 +47,9 @@ class BaseAttacker(metaclass=ABCMeta):
         **kwargs
     ):
         pass
-    
-    @abstractmethod
-    def set_name(self, parameters: Dict):
-        pass
 
     @torch.no_grad()
-    def set_projection(self, x: torch.Tensor) -> None:
+    def set_projection(self) -> None:
         self.projection = lambda x: x.clamp(min=0.0, max=1.0)
 
     @torch.no_grad()

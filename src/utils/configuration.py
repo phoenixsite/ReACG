@@ -14,6 +14,11 @@ logger = setup_logger(__name__)
 
 
 def reproducibility():
+    """
+    Set the ennvironment variables and configurations so subsequent runnings
+    of the experiments can be reproduced.
+    """
+
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     os.environ["PYTHONHASHSEED"] = "0"
     random.seed(0)
@@ -24,6 +29,11 @@ def reproducibility():
 
 
 def get_machine_info():
+    """
+    Return the information about the OS, platform, machine's name on the
+    current network and the processor.
+    """
+
     system = platform.system()
     plf = platform.platform(aliased=True)
     node = platform.node()
@@ -32,21 +42,42 @@ def get_machine_info():
     return dict(system=system, platform=plf, node=node, processor=processor)
 
 
-def set_configurations(config, args):
-    # add other attributes.
-    setattr(config, "output_dir", args.output_dir)
-    setattr(config, "gpu_id", args.gpu)
-    setattr(config, "yaml_paths", args.param)
-    if args.batch_size is not None:
-        setattr(config, "batch_size", args.batch_size)
+def get_configurations(args):
+    """
+    Get the configuration of a running from the program's arguments. 
 
-    # execution command
+    Modify the attributes of `config` according to the
+    values of `args`.  The attributes added to `config` are:
+
+    * `output_dir`: directory name where the directory structure of the
+      results will be created.
+    * `gpu_id`: The identifier of the GPU that is used to run the
+      experiments. 
+    * `yaml_paths`: list of file paths in YAML format where the parameters of
+      the experiments are stored. See `utils.io.read_yaml` to see which
+      params are those.
+    * `batch_size`: 
+    * `cmd`: string of alternative parameters for the experiments. See
+        for more information.
+    * `environ_variables`: all the OS environments in the session used to run
+      the program.
+    * `machine`: Information about the machine that runs the experiments.
+      See `utils.configuration.get_machine_info()` for more information.
+    """
+
     cmd_argv = " ".join((["python"] + sys.argv))
-    setattr(config, "cmd", cmd_argv)
 
-    # environmental variables
-    environ_variables = dict(os.environ)
-    setattr(config, "environ_variables", environ_variables)
+    d = {
+        "output_dir": args.output_dir,
+        "gpu_id": args.gpu,
+        "yaml_paths": args.param,
+        "cmd": cmd_argv,
+        "environ_variables": dict(os.environ),
+        "machine": get_machine_info()
+    }
+    
+    if args.batch_size:
+        d["batch_size"] = args.batch_size
 
     # git hash
     # git_hash = git.cmd.Git("./").rev_parse("HEAD")
@@ -57,10 +88,7 @@ def set_configurations(config, args):
     # branch = subprocess.check_output(_cmd.split()).strip().decode("utf-8")
     # branch = "-".join(branch.split("/"))
     # setattr(config, "branch", branch)
-
-    # machine information
-    machine = get_machine_info()
-    setattr(config, "machine", machine)
+    return d
 
 
 def correct_param(param, param_initialpoint, param_stepsize, dataset):
