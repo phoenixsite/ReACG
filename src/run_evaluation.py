@@ -172,10 +172,7 @@ class EvaluatorLinf(EvaluatorBase):
         n_forward += len(x_test)
         short_summary_path = os.path.join(output_root_dir, "short_summary.txt")
         
-        msg = f"\ntotal time (sec) = {time.time() - stime:.3f}\n"
-        f"clean acc(%) = {_clean_acc:.2f}\nrobust acc(%) = {robust_acc:.2f}\n"
-        f"ASR(%) = {attack_success_rate:.2f}\nForward = {n_forward}\n"
-        f"Backward = {n_backward}"
+        msg = f"\ntotal time (sec) = {time.time() - stime:.3f}\nclean acc(%) = {_clean_acc:.2f}\nrobust acc(%) = {robust_acc:.2f}\nASR(%) = {attack_success_rate:.2f}\nForward = {n_forward}\nBackward = {n_backward}"
         
         with open(short_summary_path, "w") as f:
             f.write(msg)
