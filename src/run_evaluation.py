@@ -140,10 +140,12 @@ class EvaluatorLinf(EvaluatorBase):
                 is_adv = is_adv.item()
                 
                 if is_adv:
+                    output_dir = os.path.join(output_images_dir, y_test[index])
+                    os.makedirs(output_dir, exist_ok=True)
                     image_cpu = x_advs[index].cpu()
                     image_name = f"{index}.png"
                     torchvision.utils.save_image(
-                        image_cpu, os.path.join(output_images_dir, image_name)
+                        image_cpu, os.path.join(output_dir, image_name)
                     )
 
         run_yaml_path = os.path.join(
