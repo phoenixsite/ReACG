@@ -140,7 +140,7 @@ class EvaluatorLinf(EvaluatorBase):
                 is_adv = is_adv.item()
                 
                 if is_adv:
-                    output_dir = os.path.join(output_images_dir, y_test[index])
+                    output_dir = os.path.join(output_images_dir, str(y_test[index].item()))
                     os.makedirs(output_dir, exist_ok=True)
                     image_cpu = x_advs[index].cpu()
                     image_name = f"{index}.png"
