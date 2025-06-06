@@ -72,10 +72,10 @@ def load_dataset(data_dir: str):
     
     transformations = transforms.Compose([
         transforms.ToTensor()
-    ]),
+    ])
 
     classes_unique = [d.name for d in os.scandir(data_dir) if d.is_dir()]
-    logger.debug(f"Read {len(classes_unique)} classes")
+    logger.info(f"Read {len(classes_unique)} classes")
     samples, classes = [], []
 
     for class_unique in classes_unique:
@@ -87,11 +87,11 @@ def load_dataset(data_dir: str):
             sample = default_loader(image_path.path)
             sample = transformations(sample)
             samples.append(sample.unsqueeze(0))
-            classes.append(class_unique)
+            classes.append(int(class_unique))
 
     samples = torch.vstack(samples)
     classes = torch.tensor(classes)
-    logger.debug(f"{len(sample)} samples have been read")
+    logger.info(f"{len(sample)} samples have been read")
     return samples, classes
 
 
@@ -100,7 +100,7 @@ def load_model(
         model_dir: str=os.path.join("../models"),
 ):
     if timm.is_model(model_name):
-        model = timm.create_model(model, pretrained=True)
+        model = timm.create_model(model_name, pretrained=True)
     # elif model_name == "random-padding":
     
     # elif model_name == "jpeg":
@@ -128,13 +128,13 @@ def main(args):
     batch_size = args.batch_size
 
     sample, classes = load_dataset(args.data_dir)
-    model = load_model(args.model_name)
+    model = load_model(args.model)
     model = model.to(device)
     model.eval()
 
     output_dir = os.path.join(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
-    short_summary_path = os.path.join(output_dir, f"{args.model_name}.txt")
+    short_summary_path = os.path.join(output_dir, f"{args.model}.txt")
 
     stime = time.time()
     
@@ -144,13 +144,12 @@ def main(args):
     nbatches = math.ceil(nexamples / batch_size)
 
     for idx in range(nbatches):
-
         begin = idx * batch_size
         end = min((idx + 1) * batch_size, nexamples)
         target_sample_indices = target_sample_indices_all[begin:end]
         logit = model(sample[target_sample_indices].clone().to(device)).cpu()
         preds = logit.argmax(1)
-        logger.debug(f"Prediction: {preds}, Ground truth: {classes[target_sample_indices]}")
+        logger.info(msg=f"idx = {idx}, Prediction: {preds}, Ground truth: {classes[target_sample_indices]}")
         acc[target_sample_indices] = preds == classes[target_sample_indices]
         #inds = logit.argsort(1)
 
@@ -158,7 +157,7 @@ def main(args):
 
     accuracy = 100 * acc.sum().item() / acc.shape[0]
     attack_success_rate = 100 - accuracy
-    msg = f"adversarial images:{args.data_dir}\ntarget model = {args.model_name}\ntotal time (sec) = {time.time() - stime:.3f}\ntransferability ASR(%) = {attack_success_rate:.2f}\n"
+    msg = f"adversarial images:{args.data_dir}\ntarget model = {args.model}\ntotal time (sec) = {time.time() - stime:.3f}\ntransferability ASR(%) = {attack_success_rate:.2f}\n"
     with open(short_summary_path, "w") as f:
         f.write(msg)
     logger.info(msg)
