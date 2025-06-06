@@ -1,0 +1,169 @@
+"""
+Test a sample of adversarial examples generated with an attack over a model.
+"""
+
+import os
+import sys
+import time
+import math
+
+import torch
+import timm
+from argparse import ArgumentParser
+
+from robustbench.loaders import CustomImageFolder
+
+from utils import reproducibility, setup_logger
+
+TOP_BANNER = "Transferability"
+
+def argparser():
+    
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-d",
+        "--data-dir",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "-m",
+        "--model",
+        choices=[
+            "vgg16.tv_in1k",
+            "inception_v3.tv_in1k",
+            "resnet50.tv2_in1k",
+            "inception_v3.tf_adv_in1k",
+            "inception_resnet_v2.tf_ens_adv_in1k",
+            "random-padding",
+            "jpeg",
+            "bit-reduction",
+            "feature-distillation",
+            "randomized-smoothing",
+            "neural-representation-purifier",
+            "vgg19.tv_in1k",
+            "resnet152.tv2_in1k",
+            "mobilenetv2_140.ra_in1k",
+        ],
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "--log-level",
+        type=int,
+        default=30,
+        help="10:DEBUG,20:INFO,30:WARNING,40:ERROR,50:CRITICAL",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        help="Output directory name (not path)",
+        required=True,
+        type=str,
+    )
+    parser.add_argument("--nthreads", type=int, default=4)
+    parser.add_argument("-g", "--gpu-id", type=int, default=0)
+    parser.add_argument("-bs", "--batch-size", type=int, required=True)
+    return parser
+
+
+def load_dataset(data_dir: str):
+
+    dataset = CustomImageFolder(data_dir)
+    sample, classes = [], []
+
+    for index in range(len(dataset)):
+        x, y, _ = dataset[index]
+        sample.append(x.unsqueeze(0))
+        classes.append(y)
+
+    sample = torch.vstack(sample)
+    classes = torch.tensor(classes)
+
+    return sample, classes
+
+
+def load_model(
+        model_name: str,
+        model_dir: str=os.path.join("../models"),
+):
+    if timm.is_model(model_name):
+        model = timm.create_model(model, pretrained=True)
+    # elif model_name == "random-padding":
+    
+    # elif model_name == "jpeg":
+
+    # elif model_name == "bit-reduction":
+
+    # elif model_name == "feature-distillation":
+
+    # elif model_name == "randomized-smoothing":
+            
+    # elif model_name == "neural-representation-purifier":
+        
+    else:
+        raise ValueError(f"The value {model_name} is not a valid model name.")
+    
+    return model
+
+def main(args):
+    
+    device = (
+        torch.device(f"cuda:{args.gpu_id}")
+        if torch.cuda.is_available() and args.gpu_id is not None
+        else torch.device("cpu")
+    )
+    batch_size = args.batch_size
+
+    sample, classes = load_dataset(args.data_dir)
+    model = load_model(args.model_name)
+    model = model.to(device)
+    model.eval()
+
+    output_dir = os.path.join(args.output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    short_summary_path = os.path.join(output_dir, f"{args.model_name}.txt")
+
+    stime = time.time()
+    
+    nexamples = len(sample)
+    acc = torch.ones((nexamples,), dtype=bool)
+    target_sample_indices_all = torch.arange(nexamples, dtype=torch.long)
+    nbatches = math.ceil(nexamples / batch_size)
+
+    for idx in range(nbatches):
+
+        begin = idx * batch_size
+        end = min((idx + 1) * batch_size, nexamples)
+        target_sample_indices = target_sample_indices_all[begin:end]
+        logit = model(sample[target_sample_indices].clone().to(device)).cpu()
+        preds = logit.argmax(1)
+        logger.debug(f"Prediction: {preds}, Ground truth: {classes[target_sample_indices]}")
+        acc[target_sample_indices] = preds == classes[target_sample_indices]
+        #inds = logit.argsort(1)
+
+    logger.info(f"accuracy: {acc.sum().item() / acc.shape[0] * 100:.2f}%")
+
+    accuracy = 100 * acc.sum().item() / acc.shape[0]
+    attack_success_rate = 100 - accuracy
+    msg = f"model = {args.model_name}\ntotal time (sec) = {time.time() - stime:.3f}\ntransferability ASR(%) = {attack_success_rate:.2f}\n"
+    with open(short_summary_path, "w") as f:
+        f.write(msg)
+    logger.info(msg)
+
+
+if __name__ == '__main__':
+
+    sys.path.append("../src")
+    reproducibility()
+    parser = argparser()
+    args = parser.parse_args()
+
+    if args.batch_size < 1:
+        raise ValueError("The batch size must be greater than 1.")
+
+    logger = setup_logger.setLevel(args.log_level)
+    torch.set_num_threads(args.nthreads)
+    os.environ["OMP_NUM_THREADS"] = str(args.nthreads)
+
+    main(args)
