@@ -13,6 +13,7 @@ import timm
 from argparse import ArgumentParser
 
 from robustbench.loaders import default_loader
+from robustbench.data import get_timm_model_preprocessing
 
 from utils import reproducibility, setup_logger
 
@@ -68,11 +69,12 @@ def argparser():
     return parser
 
 
-def load_dataset(data_dir: str):
+def load_dataset(data_dir: str, transformations=None):
     
-    transformations = transforms.Compose([
-        transforms.ToTensor()
-    ])
+    if not transformations:
+        transformations = transforms.Compose([
+            transforms.ToTensor()
+        ])
 
     classes_unique = [d.name for d in os.scandir(data_dir) if d.is_dir()]
     logger.info(f"Read {len(classes_unique)} classes")
@@ -99,8 +101,10 @@ def load_model(
         model_name: str,
         model_dir: str=os.path.join("../models"),
 ):
+    transformations = None
     if timm.is_model(model_name):
         model = timm.create_model(model_name, pretrained=True)
+        transformations = get_timm_model_preprocessing(model_name)
     # elif model_name == "random-padding":
     
     # elif model_name == "jpeg":
@@ -116,7 +120,7 @@ def load_model(
     else:
         raise ValueError(f"The value {model_name} is not a valid model name.")
     
-    return model
+    return model, transformations
 
 def main(args):
     
@@ -126,11 +130,10 @@ def main(args):
         else torch.device("cpu")
     )
     batch_size = args.batch_size
-
-    sample, classes = load_dataset(args.data_dir)
-    model = load_model(args.model)
+    model, transformations = load_model(args.model)
     model = model.to(device)
     model.eval()
+    sample, classes = load_dataset(args.data_dir, transformations)
 
     output_dir = os.path.join(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
@@ -144,12 +147,12 @@ def main(args):
     nbatches = math.ceil(nexamples / batch_size)
 
     for idx in range(nbatches):
+        logger.info(msg=f"idx = {idx}")
         begin = idx * batch_size
         end = min((idx + 1) * batch_size, nexamples)
         target_sample_indices = target_sample_indices_all[begin:end]
         logit = model(sample[target_sample_indices].clone().to(device)).cpu()
         preds = logit.argmax(1)
-        logger.info(msg=f"idx = {idx}, Prediction: {preds}, Ground truth: {classes[target_sample_indices]}")
         acc[target_sample_indices] = preds == classes[target_sample_indices]
         #inds = logit.argsort(1)
 
@@ -158,8 +161,10 @@ def main(args):
     accuracy = 100 * acc.sum().item() / acc.shape[0]
     attack_success_rate = 100 - accuracy
     msg = f"adversarial images:{args.data_dir}\ntarget model = {args.model}\ntotal time (sec) = {time.time() - stime:.3f}\ntransferability ASR(%) = {attack_success_rate:.2f}\n"
-    with open(short_summary_path, "w") as f:
+    with open(short_summary_path, "a") as f:
         f.write(msg)
+        f.write("\n")
+
     logger.info(msg)
 
 
