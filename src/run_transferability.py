@@ -8,9 +8,9 @@ import time
 import math
 
 import torch
+from torchvision import transforms
 import timm
 from argparse import ArgumentParser
-import pkg_resources
 
 from robustbench.loaders import default_loader
 
@@ -70,6 +70,10 @@ def argparser():
 
 def load_dataset(data_dir: str):
     
+    transformations = transforms.Compose([
+        transforms.ToTensor()
+    ]),
+
     classes_unique = [d.name for d in os.scandir(data_dir) if d.is_dir()]
     logger.debug(f"Read {len(classes_unique)} classes")
     samples, classes = [], []
@@ -80,7 +84,8 @@ def load_dataset(data_dir: str):
         logger.debug(f"Reading directory {class_dir}")
 
         for image_path in os.scandir(class_dir):
-            sample = default_loader(image_path)
+            sample = default_loader(image_path.path)
+            sample = transformations(sample)
             samples.append(sample.unsqueeze(0))
             classes.append(class_unique)
 
