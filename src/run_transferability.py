@@ -10,8 +10,9 @@ import math
 import torch
 import timm
 from argparse import ArgumentParser
+import pkg_resources
 
-from robustbench.loaders import CustomImageFolder
+from robustbench.loaders import default_loader
 
 from utils import reproducibility, setup_logger
 
@@ -68,19 +69,25 @@ def argparser():
 
 
 def load_dataset(data_dir: str):
+    
+    classes_unique = [d.name for d in os.scandir(data_dir) if d.is_dir()]
+    logger.debug(f"Read {len(classes_unique)} classes")
+    samples, classes = [], []
 
-    dataset = CustomImageFolder(data_dir)
-    sample, classes = [], []
+    for class_unique in classes_unique:
+        class_dir = os.path.join(data_dir, class_unique)
 
-    for index in range(len(dataset)):
-        x, y, _ = dataset[index]
-        sample.append(x.unsqueeze(0))
-        classes.append(y)
+        logger.debug(f"Reading directory {class_dir}")
 
-    sample = torch.vstack(sample)
+        for image_path in os.scandir(class_dir):
+            sample = default_loader(image_path)
+            samples.append(sample.unsqueeze(0))
+            classes.append(class_unique)
+
+    samples = torch.vstack(samples)
     classes = torch.tensor(classes)
-
-    return sample, classes
+    logger.debug(f"{len(sample)} samples have been read")
+    return samples, classes
 
 
 def load_model(
@@ -146,7 +153,7 @@ def main(args):
 
     accuracy = 100 * acc.sum().item() / acc.shape[0]
     attack_success_rate = 100 - accuracy
-    msg = f"model = {args.model_name}\ntotal time (sec) = {time.time() - stime:.3f}\ntransferability ASR(%) = {attack_success_rate:.2f}\n"
+    msg = f"adversarial images:{args.data_dir}\ntarget model = {args.model_name}\ntotal time (sec) = {time.time() - stime:.3f}\ntransferability ASR(%) = {attack_success_rate:.2f}\n"
     with open(short_summary_path, "w") as f:
         f.write(msg)
     logger.info(msg)
