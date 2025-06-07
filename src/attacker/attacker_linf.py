@@ -26,8 +26,14 @@ class ACGLinf(ACG):
         self.projection = ProjectionLinf(lower=self.lower, upper=self.upper)
 
     def check_feasibility(self, x: torch.Tensor):
-        assert (x >= self.lower.cpu()).all()
-        assert (x <= self.upper.cpu()).all()
+        bad_values = (x < self.lower.cpu())
+
+        if bad_values.any():
+            raise ValueError(f"There is some value in x lower than the lower bound: lower bound={self.lower}, bad_values={bad_values}")
+    
+        bad_values = (x > self.upper.cpu())
+        if bad_values.any():
+            raise ValueError(f"There is some value in x greater than the upper bound: upper bound={self.upper}, bad_values={bad_values}")
 
 
 class ReACGLinf(ReACG):
@@ -48,8 +54,14 @@ class ReACGLinf(ReACG):
         self.projection = ProjectionLinf(lower=self.lower, upper=self.upper)
 
     def check_feasibility(self, x: torch.Tensor):
-        assert (x >= self.lower.cpu()).all()
-        assert (x <= self.upper.cpu()).all()
+        bad_values = (x < self.lower.cpu())
+
+        if bad_values.any():
+            raise ValueError(f"There is some value in x lower than the lower bound: lower bound={self.lower}, bad_values={bad_values}")
+    
+        bad_values = (x > self.upper.cpu())
+        if bad_values.any():
+            raise ValueError(f"There is some value in x greater than the upper bound: upper bound={self.upper}, bad_values={bad_values}")
 
 
 class APGDLinf(APGD):
@@ -70,5 +82,12 @@ class APGDLinf(APGD):
         self.projection = ProjectionLinf(lower=self.lower, upper=self.upper)
 
     def check_feasibility(self, x: torch.Tensor):
-        assert (x >= self.lower.cpu()).all()
-        assert (x <= self.upper.cpu()).all()
+
+        bad_values = (x < self.lower.cpu())
+
+        if bad_values.any():
+            raise ValueError(f"There is some value in x lower than the lower bound: lower bound={self.lower}, bad_values={bad_values}")
+    
+        bad_values = (x > self.upper.cpu())
+        if bad_values.any():
+            raise ValueError(f"There is some value in x greater than the upper bound: upper bound={self.upper}, bad_values={bad_values}")
