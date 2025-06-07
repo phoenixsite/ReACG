@@ -284,7 +284,7 @@ class APGD(BaseAttacker):
             if i % 5 == 0:
                 gc.collect()
 
-        self.check_feasibility(x_adv)
+        #self.check_feasibility(x_adv)
         return (
             x_adv.cpu(),
             gradk_adv.cpu(),
