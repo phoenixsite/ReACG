@@ -10,10 +10,11 @@ import math
 import torch
 from torchvision import transforms
 import timm
+from timm.data.config import resolve_model_data_config
+from timm.data.transforms_factory import create_transform
 from argparse import ArgumentParser
 
 from robustbench.loaders import default_loader
-from robustbench.data import get_timm_model_preprocessing
 
 from utils import reproducibility, setup_logger
 
@@ -104,7 +105,8 @@ def load_model(
     transformations = None
     if timm.is_model(model_name):
         model = timm.create_model(model_name, pretrained=True)
-        transformations = get_timm_model_preprocessing(model_name)
+        data_config = resolve_model_data_config(model, use_test_size=True)
+        transformations = create_transform(**data_config, is_training=False)
     # elif model_name == "random-padding":
     
     # elif model_name == "jpeg":
