@@ -30,12 +30,12 @@ class ACGLinf(ACG):
         indices = bad_values.nonzero()
 
         if bad_values.any():
-            raise ValueError(f"There is some value in x lower than the lower bound: bad_values={indices}")
+            raise ValueError(f"There is some value in x lower than the lower bound: indices={indices}, bad_values={x[indices]}, lower_bound={self.lower[indices]}")
     
         bad_values = (x > self.upper.cpu())
         indices = bad_values.nonzero()
         if bad_values.any():
-            raise ValueError(f"There is some value in x greater than the upper bound: bad_values={indices}")
+            raise ValueError(f"There is some value in x greater than the upper bound: indices={indices}, bad_values={x[indices]}, upper_bound={self.upper[indices]}")
 
 
 class ReACGLinf(ReACG):
@@ -60,12 +60,12 @@ class ReACGLinf(ReACG):
         indices = bad_values.nonzero()
 
         if bad_values.any():
-            raise ValueError(f"There is some value in x lower than the lower bound: bad_values={indices}")
+            raise ValueError(f"There is some value in x lower than the lower bound: indices={indices}, bad_values={x[indices]}, lower_bound={self.lower[indices]}")
     
         bad_values = (x > self.upper.cpu())
         indices = bad_values.nonzero()
         if bad_values.any():
-            raise ValueError(f"There is some value in x greater than the upper bound: bad_values={indices}")
+            raise ValueError(f"There is some value in x greater than the upper bound: indices={indices}, bad_values={x[indices]}, upper_bound={self.upper[indices]}")
 
 
 class APGDLinf(APGD):
@@ -90,9 +90,9 @@ class APGDLinf(APGD):
         indices = bad_values.nonzero()
 
         if bad_values.any():
-            raise ValueError(f"There is some value in x lower than the lower bound: bad_values={indices}")
+            raise ValueError(f"There is some value in x lower than the lower bound: indices={indices}, bad_values={x[indices]}, lower_bound={self.lower[indices]}")
     
         bad_values = (x > self.upper.cpu())
         indices = bad_values.nonzero()
         if bad_values.any():
-            raise ValueError(f"There is some value in x greater than the upper bound: bad_values={indices}")
+            raise ValueError(f"There is some value in x greater than the upper bound: indices={indices}, bad_values={x[indices]}, upper_bound={self.upper[indices]}")
