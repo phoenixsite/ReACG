@@ -26,14 +26,16 @@ class ACGLinf(ACG):
         self.projection = ProjectionLinf(lower=self.lower, upper=self.upper)
 
     def check_feasibility(self, x: torch.Tensor):
-        bad_values = [value for value in x if value < self.lower.cpu()]
+        bad_values = (x < self.lower.cpu())
+        indices = bad_values.nonzero()
 
         if bad_values.any():
-            raise ValueError(f"There is some value in x lower than the lower bound: lower bound={self.lower}, bad_values={bad_values}")
+            raise ValueError(f"There is some value in x lower than the lower bound: bad_values={indices}")
     
-        bad_values = [value for value in x if value > self.upper.cpu()]
+        bad_values = (x > self.upper.cpu())
+        indices = bad_values.nonzero()
         if bad_values.any():
-            raise ValueError(f"There is some value in x greater than the upper bound: upper bound={self.upper}, bad_values={bad_values}")
+            raise ValueError(f"There is some value in x greater than the upper bound: bad_values={indices}")
 
 
 class ReACGLinf(ReACG):
@@ -55,13 +57,15 @@ class ReACGLinf(ReACG):
 
     def check_feasibility(self, x: torch.Tensor):
         bad_values = (x < self.lower.cpu())
+        indices = bad_values.nonzero()
 
         if bad_values.any():
-            raise ValueError(f"There is some value in x lower than the lower bound: lower bound={self.lower}, bad_values={bad_values}")
+            raise ValueError(f"There is some value in x lower than the lower bound: bad_values={indices}")
     
         bad_values = (x > self.upper.cpu())
+        indices = bad_values.nonzero()
         if bad_values.any():
-            raise ValueError(f"There is some value in x greater than the upper bound: upper bound={self.upper}, bad_values={bad_values}")
+            raise ValueError(f"There is some value in x greater than the upper bound: bad_values={indices}")
 
 
 class APGDLinf(APGD):
@@ -82,12 +86,13 @@ class APGDLinf(APGD):
         self.projection = ProjectionLinf(lower=self.lower, upper=self.upper)
 
     def check_feasibility(self, x: torch.Tensor):
-
         bad_values = (x < self.lower.cpu())
+        indices = bad_values.nonzero()
 
         if bad_values.any():
-            raise ValueError(f"There is some value in x lower than the lower bound: lower bound={self.lower}, bad_values={bad_values}")
+            raise ValueError(f"There is some value in x lower than the lower bound: bad_values={indices}")
     
         bad_values = (x > self.upper.cpu())
+        indices = bad_values.nonzero()
         if bad_values.any():
-            raise ValueError(f"There is some value in x greater than the upper bound: upper bound={self.upper}, bad_values={bad_values}")
+            raise ValueError(f"There is some value in x greater than the upper bound: bad_values={indices}")
