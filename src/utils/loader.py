@@ -3,11 +3,9 @@ from typing import Tuple, Union
 from pathlib import Path
 
 import torch
-from timm.data.config import resolve_model_data_config
-from timm.data.transforms_factory import create_transform
 from robustbench import load_cifar10, load_model
 from robustbench.data import (CustomImageFolder, get_preprocessing,
-                              load_cifar100, get_timm_model_preprocessing)
+                              load_cifar100)
 from robustbench.model_zoo.enums import BenchmarkDataset, ThreatModel
 
 
@@ -79,12 +77,12 @@ def load_model_and_dataset(
         )
     elif dataset == "imagenet":
 
-        # prepr = get_preprocessing(
-        #     BenchmarkDataset(dataset), ThreatModel(threat_model), model_name, None
-        # )
+        prepr = get_preprocessing(
+            BenchmarkDataset(dataset), ThreatModel(threat_model), model_name, None
+        )
 
-        data_config = resolve_model_data_config(model, use_test_size=True)
-        prepr = create_transform(**data_config, is_training=False)
+        #data_config = resolve_model_data_config(model, use_test_size=True)
+        #prepr = create_transform(**data_config, is_training=False)
 
         x_test, y_test = load_imagenet(
             n_examples=n_examples,
