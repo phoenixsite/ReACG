@@ -30,8 +30,8 @@ def argparser():
         type=str,
     )
     parser.add_argument(
-        "-m",
-        "--model",
+        "-tm",
+        "--target-model",
         choices=[
             "vgg16.tv_in1k",
             "inception_v3.tv_in1k",
@@ -70,12 +70,11 @@ def argparser():
     return parser
 
 
-def load_dataset(data_dir: str, transformations=None):
+def load_dataset(data_dir: str):
     
-    if not transformations:
-        transformations = transforms.Compose([
-            transforms.ToTensor()
-        ])
+    transformations = transforms.Compose([
+        transforms.ToTensor()
+    ])
 
     classes_unique = [d.name for d in os.scandir(data_dir) if d.is_dir()]
     logger.info(f"Read {len(classes_unique)} classes")
@@ -102,11 +101,11 @@ def load_model(
         model_name: str,
         model_dir: str=os.path.join("../models"),
 ):
-    transformations = None
+    #transformations = None
     if timm.is_model(model_name):
         model = timm.create_model(model_name, pretrained=True)
-        data_config = resolve_model_data_config(model, use_test_size=True)
-        transformations = create_transform(**data_config, is_training=False)
+        #data_config = resolve_model_data_config(model, use_test_size=True)
+        #transformations = create_transform(**data_config, is_training=False)
     # elif model_name == "random-padding":
     
     # elif model_name == "jpeg":
@@ -122,7 +121,7 @@ def load_model(
     else:
         raise ValueError(f"The value {model_name} is not a valid model name.")
     
-    return model, transformations
+    return model
 
 def main(args):
     
@@ -132,10 +131,10 @@ def main(args):
         else torch.device("cpu")
     )
     batch_size = args.batch_size
-    model, transformations = load_model(args.model)
+    model = load_model(args.model)
     model = model.to(device)
     model.eval()
-    sample, classes = load_dataset(args.data_dir, transformations)
+    sample, classes = load_dataset(args.data_dir)
 
     output_dir = os.path.join(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
