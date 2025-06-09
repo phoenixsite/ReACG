@@ -160,7 +160,7 @@ class EvaluatorLinf(EvaluatorBase):
         _robust_acc, _, _ = compute_accuracy(x_advs, y_test, bs, model, device)
 
         # Get the index of the adversary examples classified
-        # correctly
+        # correctly, i.e., whose attack failed
         failed_indices_path = os.path.join(
             output_root_dir,
             "failed_indices.yaml",
