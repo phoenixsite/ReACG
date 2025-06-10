@@ -131,7 +131,7 @@ def load_imagenet(
     )
     
     dataset = CustomImageFolder(
-        "data/imagenet/val",
+        "../data/imagenet/val",
         transform=prepr,
     )
 
