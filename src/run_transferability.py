@@ -113,7 +113,7 @@ def load_adversarial_dataset(data_dir: str):
 
     samples = torch.vstack(samples)
     classes = torch.tensor(classes)
-    logger.info(f"{len(sample)} samples have been read")
+    logger.info(f"{len(samples)} samples have been read")
     return samples, classes, names
 
 
@@ -216,7 +216,7 @@ def main(args):
         clean_accuracy = acc.sum().item() / acc.shape[0] * 100
         logger.info(f"clean accuracy on real images from the adversarial dataset: {clean_accuracy:.2f}%")
 
-        good_indices = [index for index in names if acc[index]]
+        good_indices = [name for index, name in enumerate(names) if acc[index]]
         with open(good_indices_path, "w") as file:
             yaml.dump({"indices": good_indices}, file)
 
@@ -227,7 +227,8 @@ def main(args):
         
         # Get those adversarial images whose original image is correcly
         # classified by the target model
-        indices = (names == good_indices).nonzero()
+        indices = [index for index, name in enumerate(names) if name in good_indices]
+        logger.info(f"using {len(indices)} images from the total {len(names)}.")
         adv_sample = adv_sample[indices]
         classes = classes[indices]
         
