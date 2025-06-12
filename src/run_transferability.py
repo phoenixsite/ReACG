@@ -7,6 +7,7 @@ import sys
 import time
 import math
 import yaml
+import random
 
 import torch
 from torchvision import transforms
@@ -189,11 +190,14 @@ def main(args):
 
     stime = time.time()
 
+    random.seed()
+    random_n = random.randint(0, 99999999)
+    good_indices_filename = f"good_indices{random_n}.yaml"
     output_dir = os.path.join(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
     good_indices_path = os.path.join(
         output_dir,
-        "good_indices.yaml",
+        good_indices_filename,
     )
 
     if args.test_samples:
@@ -253,9 +257,11 @@ def main(args):
         attack_success_rate = 100 - accuracy
         msg = (
             f"adversarial images:{args.data_dir}\n"
+            f"number of images used in target model: {len(indices)}\n"
             f"target model = {args.target_model}\n"
             f"total time (sec) = {time.time() - stime:.3f}\n"
             f"transferability ASR(%) = {attack_success_rate:.2f}\n"
+            f"good indices file path: {good_indices_path}\n"
         )
 
         

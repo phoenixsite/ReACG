@@ -1,12 +1,12 @@
 #!/bin/bash
 
-RESULTS_DIR=../result/
+RESULTS_DIR=../result3/
 PROGRAM=run_evaluation.py
 BATCH_SIZE=150
 LOG_LEVEL=30
-NTHREADS=4
+NTHREADS=12
 
-for config_file in ../configs/transferability/acg*.yaml
+for config_file in ../configs/transferability3/acg*.yaml
 do
 	echo "Executing ACG with $config_file"
 	uv run $PROGRAM -p $config_file \
@@ -18,7 +18,7 @@ do
 		--cmd_param batch_size:int:$BATCH_SIZE
 done
 
-for config_file in ../configs/transferability/apgd*.yaml
+for config_file in ../configs/transferability3/apgd*.yaml
 do
 	echo  "Executing APGD with $config_file"
 	uv run $PROGRAM -p $config_file \
@@ -30,7 +30,7 @@ do
 		--cmd_param batch_size:int:$BATCH_SIZE
 done
 
-for config_file in ../configs/transferability/reacg*.yaml
+for config_file in ../configs/transferability3/reacg*.yaml
 do
 	echo "Executing ReACG with $config_file"
 	uv run $PROGRAM -p $config_file \

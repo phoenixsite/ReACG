@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-RESULT_DIR=../result_transfer
+RESULT_DIR=../result_transfer3
 LOG_LEVEL=30
 BATCH_SIZE=30
 PROGRAM=run_transferability.py
@@ -25,7 +25,7 @@ PROGRAM=run_transferability.py
 #         done
 # done
 
-for test_dir in ../result/2025-06-07/*
+for test_dir in ../result3/2025-06-12/*
 do
         aes_dir=$(find "$test_dir" -name "adversarial_examples" -type d)
         echo "Using $aes_dir directory"
