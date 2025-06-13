@@ -157,8 +157,8 @@ class EvaluatorLinf(EvaluatorBase):
             os.makedirs(output_images_dir, exist_ok=True)
 
             logger.info(f"Saving generated adversarial images in {output_images_dir}.")
-            for index, has_succeed in enumerate(_robust_acc):
-                if has_succeed.item():
+            for index, has_failed in enumerate(_robust_acc):
+                if not has_failed.item():
                     output_dir = os.path.join(output_images_dir, str(y_test[index].item()))
                     os.makedirs(output_dir, exist_ok=True)
                     image_cpu = x_advs[index].cpu()
