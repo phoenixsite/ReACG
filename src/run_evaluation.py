@@ -130,24 +130,6 @@ class EvaluatorLinf(EvaluatorBase):
             logger.info(f"ASR: {acc_whole.sum().item()} / {acc_whole.shape[0]}")
             acc = acc_whole.clone()
 
-        # Save the adversarial images
-        if save_adversarial:
-            output_images_dir = os.path.join(output_root_dir, "adversarial_examples")
-            os.makedirs(output_images_dir, exist_ok=True)
-
-            logger.info(f"Saving generated adversarial images in {output_images_dir}.")
-            for index, is_adv in enumerate(adversarial_inds):
-                is_adv = is_adv.item()
-                
-                if is_adv:
-                    output_dir = os.path.join(output_images_dir, str(y_test[index].item()))
-                    os.makedirs(output_dir, exist_ok=True)
-                    image_cpu = x_advs[index].cpu()
-                    image_name = f"{index}.png"
-                    torchvision.utils.save_image(
-                        image_cpu, os.path.join(output_dir, image_name)
-                    )
-
         run_yaml_path = os.path.join(
             output_root_dir,
             "run.yaml",
@@ -168,6 +150,22 @@ class EvaluatorLinf(EvaluatorBase):
         if not os.path.exists(failed_indices_path):
             with open(failed_indices_path, "w") as file:
                 yaml.dump({"indices": torch.where(_robust_acc)[0].tolist()}, file)
+
+        # Save the adversarial images
+        if save_adversarial:
+            output_images_dir = os.path.join(output_root_dir, "adversarial_examples")
+            os.makedirs(output_images_dir, exist_ok=True)
+
+            logger.info(f"Saving generated adversarial images in {output_images_dir}.")
+            for index, has_succeed in enumerate(_robust_acc):
+                if has_succeed.item():
+                    output_dir = os.path.join(output_images_dir, str(y_test[index].item()))
+                    os.makedirs(output_dir, exist_ok=True)
+                    image_cpu = x_advs[index].cpu()
+                    image_name = f"{index}.png"
+                    torchvision.utils.save_image(
+                        image_cpu, os.path.join(output_dir, image_name)
+                    )
 
         robust_acc = 100 * (_robust_acc.sum() / self.config.n_examples)
         attack_success_rate = 100 - robust_acc
